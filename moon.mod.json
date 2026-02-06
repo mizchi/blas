@@ -7,5 +7,6 @@
   "repository": "https://github.com/mizchi/blas",
   "license": "MIT",
   "keywords": ["blas", "linear-algebra", "matrix", "native"],
-  "source": "src"
+  "source": "src",
+  "supported-targets": ["native"]
 }
