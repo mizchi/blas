@@ -1,0 +1,15 @@
+import {
+  "mizchi/blas" as @blas,
+  "moonbitlang/core/env" as @env,
+  "moonbitlang/core/strconv" as @strconv,
+}
+
+options(
+  "is-main": true,
+  link: {
+    "native": {
+      "cc-link-flags": "-framework Accelerate",
+    },
+  },
+  targets: { "main.mbt": [ "native" ] },
+)
