@@ -6,10 +6,8 @@ import {
 
 options(
   "is-main": true,
-  link: {
-    "native": {
-      "cc-link-flags": "-framework Accelerate",
-    },
-  },
+  // Link flags must be provided by CI or user:
+  // macOS: "-framework Accelerate"
+  // Linux: "-lopenblas -llapack -lm"
   targets: { "main.mbt": [ "native" ] },
 )
