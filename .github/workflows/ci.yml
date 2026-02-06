@@ -8,10 +8,30 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            link-flags: "-framework Accelerate"
+          - os: ubuntu-latest
+            link-flags: "-lopenblas -llapack -lm"
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install OpenBLAS and LAPACK (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapack-dev
+      - name: Configure link flags
+        run: |
+          cat > src/moon.pkg << 'EOF'
+          options(
+            link: { "native": { "cc-link-flags": "${{ matrix.link-flags }}" } },
+            "native-stub": [ "blas_stub.c" ],
+            "supported-targets": [ "native" ],
+          )
+          EOF
+          cat src/moon.pkg
       - name: Install MoonBit CLI
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
@@ -19,6 +39,6 @@ jobs:
       - name: Moon update
         run: moon update
       - name: Moon check
-        run: moon check --deny-warn --target js
+        run: moon check --target native
       - name: Moon test
-        run: moon test --target js
+        run: moon test --target native

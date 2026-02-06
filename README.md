@@ -64,17 +64,31 @@ just docker-bench  # benchmark on Linux
 
 ## Platform Support
 
+**Important**: You must add the appropriate link flags to your package's `moon.pkg`:
+
 ### macOS
+
+```
+options(
+  link: { "native": { "cc-link-flags": "-framework Accelerate" } },
+)
+```
 
 Uses Apple Accelerate.framework (no additional setup required).
 
 ### Linux
 
-Requires OpenBLAS:
+```
+options(
+  link: { "native": { "cc-link-flags": "-lopenblas -llapack -lm" } },
+)
+```
+
+Requires OpenBLAS and LAPACK:
 
 ```bash
 # Ubuntu/Debian
-sudo apt-get install libopenblas-dev
+sudo apt-get install libopenblas-dev liblapack-dev
 
 # Or use Docker
 just docker-build

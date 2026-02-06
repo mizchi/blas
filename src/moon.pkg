@@ -1,11 +1,7 @@
 options(
-  link: {
-    "native": {
-      // macOS: use Accelerate.framework
-      // Linux: override with MOON_CC_LINK_FLAGS="-lopenblas -lm"
-      "cc-link-flags": "-framework Accelerate",
-    },
-  },
+  // Link flags must be provided by the consuming package:
+  // macOS: "-framework Accelerate"
+  // Linux: "-lopenblas -lm" (requires libopenblas-dev)
   "native-stub": [ "blas_stub.c" ],
   "supported-targets": [ "native" ],
 )
