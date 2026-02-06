@@ -8,5 +8,6 @@
   "license": "MIT",
   "keywords": ["blas", "linear-algebra", "matrix", "native"],
   "source": "src",
-  "supported-targets": ["native"]
+  "supported-targets": ["native"],
+  "preferred-target": "native"
 }
