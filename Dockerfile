@@ -1,5 +1,6 @@
 # Linux build environment with OpenBLAS
-FROM ubuntu:24.04
+# Use amd64 platform (MoonBit doesn't support Linux ARM64 yet)
+FROM --platform=linux/amd64 ubuntu:24.04
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -18,8 +19,8 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
-# Patch moon.pkg for Linux (replace Accelerate with OpenBLAS)
-RUN sed -i 's/-framework Accelerate/-lopenblas -lm/' src/moon.pkg
+# Patch moon.pkg files for Linux (replace Accelerate with OpenBLAS)
+RUN sed -i 's/-framework Accelerate/-lopenblas -lm/' src/moon.pkg src/bench/moon.pkg
 
 # Build and test
 CMD ["sh", "-c", "moon check --target native && moon test --target native"]
