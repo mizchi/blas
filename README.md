@@ -81,6 +81,25 @@ just docker-build
 just docker-test
 ```
 
+### Header Resolution
+
+The C stub uses preprocessor directives for cross-platform support:
+
+```c
+#ifdef __APPLE__
+  #include <Accelerate/Accelerate.h>  // macOS system framework
+#else
+  #include <cblas.h>                   // OpenBLAS
+#endif
+```
+
+| Platform | Header | Library | Notes |
+|----------|--------|---------|-------|
+| macOS | `<Accelerate/Accelerate.h>` | `-framework Accelerate` | System default |
+| Linux | `<cblas.h>` | `-lopenblas -lm` | Requires `libopenblas-dev` |
+
+Both provide the standard CBLAS API (`cblas_sgemm`, `cblas_sgemv`, etc.).
+
 ## Benchmark
 
 MNIST 2-layer MLP (784→128→10), batch size 128:
