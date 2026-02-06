@@ -24,7 +24,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapack-dev
       - name: Configure link flags
         run: |
-          cat > src/moon.pkg << 'EOF'
+          cat > src/moon.pkg << EOF
           options(
             link: { "native": { "cc-link-flags": "${{ matrix.link-flags }}" } },
             "native-stub": [ "blas_stub.c" ],
