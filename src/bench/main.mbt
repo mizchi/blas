@@ -109,14 +109,7 @@ fn parse_args(args : Array[String]) -> Result[BenchArgs, String] {
     }
     return Err("unknown argument: " + arg)
   }
-  Ok({
-    input_size,
-    hidden_size,
-    output_size,
-    batch_size,
-    warmup,
-    iters,
-  })
+  Ok({ input_size, hidden_size, output_size, batch_size, warmup, iters })
 }
 
 ///|
@@ -127,7 +120,7 @@ fn seeded_values(seed : Int, count : Int, offset : Int) -> Array[Float] {
   let mut state = seed
   for i = 0; i < count; i = i + 1 {
     state = state * a + c
-    let v = (state.land(0x7FFFFFFF) % 1000).to_float() / 1000.0 - 0.5
+    let v = Float::from_int((state & 0x7FFFFFFF) % 1000) / 1000.0 - 0.5
     arr[i] = v + Float::from_int(offset) * 0.001
   }
   arr
@@ -151,12 +144,7 @@ fn run_mlp_fused_bench(cfg : BenchArgs) -> Unit {
     cfg.output_size,
   )
   @blas.mlp_buffers_init(
-    bufs,
-    batch_input,
-    weight1_data,
-    bias1_data,
-    weight2_data,
-    bias2_data,
+    bufs, batch_input, weight1_data, bias1_data, weight2_data, bias2_data,
   )
 
   // Warmup
@@ -184,12 +172,13 @@ fn run_mlp_fused_bench(cfg : BenchArgs) -> Unit {
   @blas.mlp_buffers_free(bufs)
 
   // Output (use Int64 to avoid overflow)
-  let ops_per_iter : Int64 = cfg.batch_size.to_int64() * (
-    cfg.input_size.to_int64() * cfg.hidden_size.to_int64() * 2L + // layer1 matmul
-    cfg.hidden_size.to_int64() + // layer1 bias
-    cfg.hidden_size.to_int64() * cfg.output_size.to_int64() * 2L + // layer2 matmul
-    cfg.output_size.to_int64() // layer2 bias
-  )
+  let ops_per_iter : Int64 = cfg.batch_size.to_int64() *
+    (
+      cfg.input_size.to_int64() * cfg.hidden_size.to_int64() * 2L + // layer1 matmul
+      cfg.hidden_size.to_int64() + // layer1 bias
+      cfg.hidden_size.to_int64() * cfg.output_size.to_int64() * 2L + // layer2 matmul
+      cfg.output_size.to_int64() // layer2 bias
+    )
   let total_ops = ops_per_iter * cfg.iters.to_int64()
   let elapsed_ms_f = elapsed_ms.to_double()
   let gflops = if elapsed_ms_f > 0.0 {
@@ -200,15 +189,23 @@ fn run_mlp_fused_bench(cfg : BenchArgs) -> Unit {
 
   println(
     "{\"type\":\"mlp_forward_fused\"" +
-    ",\"input\":" + cfg.input_size.to_string() +
-    ",\"hidden\":" + cfg.hidden_size.to_string() +
-    ",\"output\":" + cfg.output_size.to_string() +
-    ",\"batch\":" + cfg.batch_size.to_string() +
-    ",\"iters\":" + cfg.iters.to_string() +
-    ",\"elapsed_ms\":" + elapsed_ms.to_string() +
-    ",\"gflops\":" + gflops.to_string() +
-    ",\"sample_output\":" + output[0].to_string() +
-    "}"
+    ",\"input\":" +
+    cfg.input_size.to_string() +
+    ",\"hidden\":" +
+    cfg.hidden_size.to_string() +
+    ",\"output\":" +
+    cfg.output_size.to_string() +
+    ",\"batch\":" +
+    cfg.batch_size.to_string() +
+    ",\"iters\":" +
+    cfg.iters.to_string() +
+    ",\"elapsed_ms\":" +
+    elapsed_ms.to_string() +
+    ",\"gflops\":" +
+    gflops.to_string() +
+    ",\"sample_output\":" +
+    output[0].to_string() +
+    "}",
   )
 }
 
@@ -253,14 +250,21 @@ fn run_sgemm_bench(cfg : BenchArgs) -> Unit {
 
   println(
     "{\"type\":\"sgemm\"" +
-    ",\"m\":" + m.to_string() +
-    ",\"n\":" + n.to_string() +
-    ",\"k\":" + k.to_string() +
-    ",\"iters\":" + cfg.iters.to_string() +
-    ",\"elapsed_ms\":" + elapsed_ms.to_string() +
-    ",\"gflops\":" + gflops.to_string() +
-    ",\"sample_output\":" + c[0].to_string() +
-    "}"
+    ",\"m\":" +
+    m.to_string() +
+    ",\"n\":" +
+    n.to_string() +
+    ",\"k\":" +
+    k.to_string() +
+    ",\"iters\":" +
+    cfg.iters.to_string() +
+    ",\"elapsed_ms\":" +
+    elapsed_ms.to_string() +
+    ",\"gflops\":" +
+    gflops.to_string() +
+    ",\"sample_output\":" +
+    c[0].to_string() +
+    "}",
   )
 }
 

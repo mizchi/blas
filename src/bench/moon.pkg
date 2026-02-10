@@ -1,7 +1,7 @@
 import {
-  "mizchi/blas" as @blas,
-  "moonbitlang/core/env" as @env,
-  "moonbitlang/core/strconv" as @strconv,
+  "mizchi/blas" @blas,
+  "moonbitlang/core/env" @env,
+  "moonbitlang/core/strconv" @strconv,
 }
 
 options(

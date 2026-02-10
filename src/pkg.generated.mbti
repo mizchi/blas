@@ -1,0 +1,114 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/blas"
+
+// Values
+pub fn alloc_floats(Int) -> FloatBuffer
+
+pub fn alloc_ints(Int) -> IntBuffer
+
+pub fn copy_from_buffer(Array[Float], FloatBuffer) -> Unit
+
+pub fn copy_to_buffer(FloatBuffer, Array[Float]) -> Unit
+
+pub fn free_floats(FloatBuffer) -> Unit
+
+pub fn free_ints(IntBuffer) -> Unit
+
+pub fn get_float(FloatBuffer, Int) -> Float
+
+pub fn get_int(IntBuffer, Int) -> Int
+
+pub fn layer1_fused(FloatBuffer, FloatBuffer, FloatBuffer, FloatBuffer, Int, Int, Int) -> Unit
+
+pub fn layer2_fused(FloatBuffer, FloatBuffer, FloatBuffer, FloatBuffer, Int, Int, Int) -> Unit
+
+pub fn mlp_buffers_create(Int, Int, Int, Int) -> MlpBuffers
+
+pub fn mlp_buffers_free(MlpBuffers) -> Unit
+
+pub fn mlp_buffers_get_output(MlpBuffers, Array[Float]) -> Unit
+
+pub fn mlp_buffers_init(MlpBuffers, Array[Float], Array[Float], Array[Float], Array[Float], Array[Float]) -> Unit
+
+pub fn mlp_forward_fused(MlpBuffers) -> Unit
+
+pub fn mlp_train_buffers_create(Int, Int, Int, Int) -> MlpTrainBuffers
+
+pub fn mlp_train_buffers_free(MlpTrainBuffers) -> Unit
+
+pub fn mlp_train_buffers_get_weights(MlpTrainBuffers, Array[Float], Array[Float], Array[Float], Array[Float]) -> Unit
+
+pub fn mlp_train_buffers_init_weights(MlpTrainBuffers, Array[Float], Array[Float], Array[Float], Array[Float]) -> Unit
+
+pub fn mlp_train_step(MlpTrainBuffers, Array[Float], Array[Int], Float) -> (Float, Int)
+
+pub fn saxpy(Float, Array[Float], Array[Float]) -> Unit
+
+pub fn sdot(Array[Float], Array[Float]) -> Float
+
+pub fn set_float(FloatBuffer, Int, Float) -> Unit
+
+pub fn set_int(IntBuffer, Int, Int) -> Unit
+
+pub fn sgemm(Array[Float], Array[Float], Array[Float], Int, Int, Int) -> Unit
+
+pub fn sgemm_direct(FloatBuffer, FloatBuffer, FloatBuffer, Int, Int, Int) -> Unit
+
+pub fn sgemv(Array[Float], Array[Float], Array[Float], Int, Int) -> Unit
+
+pub fn sgemv_trans(Array[Float], Array[Float], Array[Float], Int, Int) -> Unit
+
+pub fn snrm2(Array[Float]) -> Float
+
+// Errors
+
+// Types and methods
+pub struct FloatBuffer(Int64)
+#deprecated
+pub fn FloatBuffer::inner(Self) -> Int64
+
+pub struct IntBuffer(Int64)
+#deprecated
+pub fn IntBuffer::inner(Self) -> Int64
+
+pub struct MlpBuffers {
+  input : FloatBuffer
+  weight1 : FloatBuffer
+  bias1 : FloatBuffer
+  hidden : FloatBuffer
+  weight2 : FloatBuffer
+  bias2 : FloatBuffer
+  output : FloatBuffer
+  batch : Int
+  input_dim : Int
+  hidden_dim : Int
+  output_dim : Int
+}
+
+pub struct MlpTrainBuffers {
+  weight1 : FloatBuffer
+  bias1 : FloatBuffer
+  weight2 : FloatBuffer
+  bias2 : FloatBuffer
+  input : FloatBuffer
+  hidden : FloatBuffer
+  output : FloatBuffer
+  probs : FloatBuffer
+  grad_w1 : FloatBuffer
+  grad_b1 : FloatBuffer
+  grad_w2 : FloatBuffer
+  grad_b2 : FloatBuffer
+  delta2 : FloatBuffer
+  delta1 : FloatBuffer
+  labels : IntBuffer
+  result : FloatBuffer
+  batch : Int
+  input_dim : Int
+  hidden_dim : Int
+  output_dim : Int
+}
+
+// Type aliases
+
+// Traits
+
