@@ -1,6 +1,6 @@
 {
   "name": "mizchi/blas",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "BLAS bindings for MoonBit (Accelerate/OpenBLAS)",
   "deps": {},
   "readme": "README.md",
