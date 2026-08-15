@@ -25,21 +25,26 @@ jobs:
       - name: Configure link flags
         run: |
           cat > src/moon.pkg << EOF
+          supported_targets = "native"
+
           options(
             link: { "native": { "cc-link-flags": "${{ matrix.link-flags }}" } },
             "native-stub": [ "blas_stub.c" ],
-            "supported-targets": [ "native" ],
           )
           EOF
           cat src/moon.pkg
           cat > src/bench/moon.pkg << EOF
           import {
-            "mizchi/blas" as @blas,
-            "moonbitlang/core/env" as @env,
-            "moonbitlang/core/strconv" as @strconv,
+            "mizchi/blas" @blas,
+            "moonbitlang/core/env" @env,
+            "moonbitlang/core/string" @string,
           }
+
+          supported_targets = "native"
+
+          pkgtype(kind: "executable")
+
           options(
-            "is-main": true,
             link: { "native": { "cc-link-flags": "${{ matrix.link-flags }}" } },
             targets: { "main.mbt": [ "native" ] },
           )

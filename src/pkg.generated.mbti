@@ -54,6 +54,8 @@ pub fn sgemm(Array[Float], Array[Float], Array[Float], Int, Int, Int) -> Unit
 
 pub fn sgemm_direct(FloatBuffer, FloatBuffer, FloatBuffer, Int, Int, Int) -> Unit
 
+pub fn sgemm_direct_batch(FloatBuffer, FloatBuffer, FloatBuffer, Int, Int, Int, iterations~ : Int) -> Unit
+
 pub fn sgemv(Array[Float], Array[Float], Array[Float], Int, Int) -> Unit
 
 pub fn sgemv_trans(Array[Float], Array[Float], Array[Float], Int, Int) -> Unit
@@ -64,12 +66,8 @@ pub fn snrm2(Array[Float]) -> Float
 
 // Types and methods
 pub struct FloatBuffer(Int64)
-#deprecated
-pub fn FloatBuffer::inner(Self) -> Int64
 
 pub struct IntBuffer(Int64)
-#deprecated
-pub fn IntBuffer::inner(Self) -> Int64
 
 pub struct MlpBuffers {
   input : FloatBuffer
@@ -111,4 +109,3 @@ pub struct MlpTrainBuffers {
 // Type aliases
 
 // Traits
-

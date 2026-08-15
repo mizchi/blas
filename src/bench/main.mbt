@@ -6,7 +6,27 @@ struct BenchArgs {
   batch_size : Int
   warmup : Int
   iters : Int
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+impl Show for BenchArgs with fn output(self, logger) {
+  logger.write_string("{input_size: ")
+  logger.write_string(self.input_size.to_string())
+  logger.write_string(", hidden_size: ")
+  logger.write_string(self.hidden_size.to_string())
+  logger.write_string(", output_size: ")
+  logger.write_string(self.output_size.to_string())
+  logger.write_string(", batch_size: ")
+  logger.write_string(self.batch_size.to_string())
+  logger.write_string(", warmup: ")
+  logger.write_string(self.warmup.to_string())
+  logger.write_string(", iters: ")
+  logger.write_string(self.iters.to_string())
+  logger.write_string("}")
+}
+
+///|
+extend BenchArgs with Show::{to_string}
 
 ///|
 fn bench_args_default() -> BenchArgs {
@@ -37,10 +57,15 @@ fn print_usage(program : String) -> Unit {
 
 ///|
 fn parse_positive_int(name : String, value : String) -> Result[Int, String] {
-  let parsed = try? @strconv.parse_int(value)
-  match parsed {
-    Ok(v) => if v > 0 { Ok(v) } else { Err(name + " must be > 0") }
-    Err(err) => Err("invalid " + name + ": " + err.to_string())
+  try {
+    let parsed = @string.parse_int(value)
+    if parsed > 0 {
+      Ok(parsed)
+    } else {
+      Err(name + " must be > 0")
+    }
+  } catch {
+    err => Err("invalid " + name + ": " + err.to_string())
   }
 }
 
@@ -272,6 +297,10 @@ fn run_sgemm_bench(cfg : BenchArgs) -> Unit {
 fn main {
   let args = @env.args()
   let program = if args.length() > 0 { args[0] } else { "bench" }
+  if args.length() == 2 && args[1] == "--square" {
+    run_square_matmul_bench()
+    return
+  }
 
   match parse_args(args) {
     Err("help") => {

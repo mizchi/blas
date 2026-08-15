@@ -120,6 +120,25 @@ test "sgemm_direct" {
 }
 
 ///|
+test "sgemm_direct_batch repeats multiplication in one native call" {
+  let a = @blas.alloc_floats(6)
+  let b = @blas.alloc_floats(6)
+  let c = @blas.alloc_floats(4)
+  @blas.copy_to_buffer(a, [1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+  @blas.copy_to_buffer(b, [7.0, 8.0, 9.0, 10.0, 11.0, 12.0])
+  @blas.sgemm_direct_batch(a, b, c, 2, 2, 3, iterations=4)
+  let actual = Array::make(4, Float::from_int(0))
+  @blas.copy_from_buffer(actual, c)
+  @blas.free_floats(a)
+  @blas.free_floats(b)
+  @blas.free_floats(c)
+  let expected : Array[Float] = [58.0, 64.0, 139.0, 154.0]
+  for i in 0..<expected.length() {
+    assert_true(actual[i].is_close(expected[i], absolute_tolerance=0.0001))
+  }
+}
+
+///|
 test "layer1_fused" {
   let f = Float::from_int
   // batch=2, in_dim=3, out_dim=2

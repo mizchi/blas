@@ -6,11 +6,8 @@ package "mizchi/blas/bench"
 // Errors
 
 // Types and methods
-type BenchArgs
-pub impl Eq for BenchArgs
-pub impl Show for BenchArgs
+type BenchArgs derive(Eq)
 
 // Type aliases
 
 // Traits
-

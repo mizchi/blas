@@ -243,6 +243,17 @@ extern "C" fn native_sgemm_direct(
 ) -> Unit = "blas_sgemm_direct"
 
 ///|
+extern "C" fn native_sgemm_direct_batch(
+  m : Int,
+  n : Int,
+  k : Int,
+  a : Int64,
+  b : Int64,
+  c : Int64,
+  iterations : Int,
+) -> Unit = "blas_sgemm_direct_batch"
+
+///|
 extern "C" fn native_layer1_fused(
   input : Int64,
   weight : Int64,
@@ -321,6 +332,23 @@ pub fn sgemm_direct(
   k : Int,
 ) -> Unit {
   native_sgemm_direct(0, 0, m, n, k, 1.0, a.0, k, b.0, n, 0.0, c.0, n)
+}
+
+///|
+/// Repeats C = A @ B in one native call while reusing all C-side buffers.
+pub fn sgemm_direct_batch(
+  a : FloatBuffer,
+  b : FloatBuffer,
+  c : FloatBuffer,
+  m : Int,
+  n : Int,
+  k : Int,
+  iterations~ : Int,
+) -> Unit {
+  if iterations <= 0 {
+    abort("sgemm_direct_batch iterations must be positive")
+  }
+  native_sgemm_direct_batch(m, n, k, a.0, b.0, c.0, iterations)
 }
 
 ///|

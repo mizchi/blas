@@ -26,6 +26,10 @@ test-update:
 bench:
     moon run src/bench --target {{target}}
 
+# Compare square SGEMM APIs with persistent buffers
+bench-square:
+    moon run src/bench --target {{target}} --release -- --square
+
 # Run benchmark with custom parameters
 bench-large:
     moon run src/bench --target {{target}} -- --batch 256 --iters 500
