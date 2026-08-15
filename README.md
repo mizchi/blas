@@ -22,6 +22,18 @@ let c = [0.0, 0.0, 0.0, 0.0]  // result
 // c = [19.0, 22.0, 43.0, 50.0]
 ```
 
+For repeated multiplication with persistent C-side buffers, one FFI call can
+execute multiple SGEMMs:
+
+```moonbit
+let a_buf = @blas.alloc_floats(m * k)
+let b_buf = @blas.alloc_floats(k * n)
+let c_buf = @blas.alloc_floats(m * n)
+@blas.copy_to_buffer(a_buf, a)
+@blas.copy_to_buffer(b_buf, b)
+@blas.sgemm_direct_batch(a_buf, b_buf, c_buf, m, n, k, iterations=16)
+```
+
 ### High-performance MLP forward pass
 
 ```moonbit
@@ -57,6 +69,7 @@ let (loss_sum, correct_count) = @blas.mlp_train_step(bufs, batch_input, batch_la
 ```bash
 just           # check + test
 just bench     # run benchmark
+just bench-square  # compare Array, direct, and batch16 square SGEMM
 just docker-build  # build Linux container
 just docker-test   # test on Linux
 just docker-bench  # benchmark on Linux
@@ -128,6 +141,7 @@ MNIST 2-layer MLP (784→128→10), batch size 128:
 ### Low-level BLAS operations
 
 - `sgemm(a, b, c, m, n, k)` - Matrix multiply: C = A @ B
+- `sgemm_direct_batch(a, b, c, m, n, k, iterations)` - Repeated SGEMM in one FFI call
 - `sgemv(a, x, y, m, n)` - Matrix-vector multiply: y = A @ x
 - `saxpy(alpha, x, y)` - Vector add: y = alpha * x + y
 - `sdot(x, y)` - Dot product

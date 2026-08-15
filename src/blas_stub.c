@@ -89,6 +89,19 @@ void blas_sgemm_direct(
   );
 }
 
+void blas_sgemm_direct_batch(
+  int m, int n, int k,
+  float* a, float* b, float* c,
+  int iterations
+) {
+  for (int i = 0; i < iterations; i++) {
+    cblas_sgemm(
+      CblasRowMajor, CblasNoTrans, CblasNoTrans,
+      m, n, k, 1.0f, a, k, b, n, 0.0f, c, n
+    );
+  }
+}
+
 void blas_sgemv_direct(
   int trans, int m, int n,
   float alpha,

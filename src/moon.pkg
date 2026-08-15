@@ -1,7 +1,8 @@
+supported_targets = "native"
+
 options(
   // Link flags must be provided by the consuming package:
   // macOS: "-framework Accelerate"
   // Linux: "-lopenblas -lm" (requires libopenblas-dev)
   "native-stub": [ "blas_stub.c" ],
-  "supported-targets": [ "native" ],
 )

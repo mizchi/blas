@@ -1,11 +1,14 @@
 import {
-  "mizchi/blas" as @blas,
-  "moonbitlang/core/env" as @env,
-  "moonbitlang/core/strconv" as @strconv,
+  "mizchi/blas",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
 }
 
+supported_targets = "native"
+
+pkgtype(kind: "executable")
+
 options(
-  "is-main": true,
   // Link flags must be provided by CI or user:
   // macOS: "-framework Accelerate"
   // Linux: "-lopenblas -llapack -lm"

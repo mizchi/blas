@@ -2,8 +2,10 @@
 /// BLAS (Basic Linear Algebra Subprograms) bindings for MoonBit
 /// Uses Apple Accelerate.framework on macOS
 
+///|
 /// sgemm: C = alpha * op(A) @ op(B) + beta * C
 /// A: M x K, B: K x N, C: M x N (row-major)
+#borrow(a, b, c)
 extern "C" fn native_sgemm(
   trans_a : Int,
   trans_b : Int,
@@ -20,8 +22,10 @@ extern "C" fn native_sgemm(
   ldc : Int,
 ) -> Unit = "blas_sgemm"
 
+///|
 /// sgemv: y = alpha * op(A) @ x + beta * y
 /// A: M x N, x: N, y: M (row-major)
+#borrow(a, x, y)
 extern "C" fn native_sgemv(
   trans : Int,
   m : Int,
@@ -36,7 +40,9 @@ extern "C" fn native_sgemv(
   incy : Int,
 ) -> Unit = "blas_sgemv"
 
+///|
 /// saxpy: y = alpha * x + y
+#borrow(x, y)
 extern "C" fn native_saxpy(
   n : Int,
   alpha : Float,
@@ -46,15 +52,9 @@ extern "C" fn native_saxpy(
   incy : Int,
 ) -> Unit = "blas_saxpy"
 
-/// sscal: x = alpha * x
-extern "C" fn native_sscal(
-  n : Int,
-  alpha : Float,
-  x : FixedArray[Byte],
-  incx : Int,
-) -> Unit = "blas_sscal"
-
+///|
 /// sdot: x . y
+#borrow(x, y)
 extern "C" fn native_sdot(
   n : Int,
   x : FixedArray[Byte],
@@ -63,21 +63,10 @@ extern "C" fn native_sdot(
   incy : Int,
 ) -> Float = "blas_sdot"
 
+///|
 /// snrm2: ||x||_2
-extern "C" fn native_snrm2(
-  n : Int,
-  x : FixedArray[Byte],
-  incx : Int,
-) -> Float = "blas_snrm2"
-
-/// scopy: y = x
-extern "C" fn native_scopy(
-  n : Int,
-  x : FixedArray[Byte],
-  incx : Int,
-  y : FixedArray[Byte],
-  incy : Int,
-) -> Unit = "blas_scopy"
+#borrow(x)
+extern "C" fn native_snrm2(n : Int, x : FixedArray[Byte], incx : Int) -> Float = "blas_snrm2"
 
 ///|
 fn float_array_to_fixed_bytes(arr : Array[Float]) -> FixedArray[Byte] {
@@ -93,7 +82,10 @@ fn float_array_to_fixed_bytes(arr : Array[Float]) -> FixedArray[Byte] {
 }
 
 ///|
-fn fixed_bytes_to_float_array(bytes : FixedArray[Byte], count : Int) -> Array[Float] {
+fn fixed_bytes_to_float_array(
+  bytes : FixedArray[Byte],
+  count : Int,
+) -> Array[Float] {
   let arr : Array[Float] = Array::make(count, Float::from_int(0))
   for i in 0..<count {
     let bits = bytes[i * 4].to_int() |
@@ -212,6 +204,7 @@ extern "C" fn native_alloc_floats(count : Int) -> Int64 = "blas_alloc_floats"
 extern "C" fn native_free_floats(buf : Int64) -> Unit = "blas_free_floats"
 
 ///|
+#borrow(src)
 extern "C" fn native_copy_from_bytes(
   dst : Int64,
   src : FixedArray[Byte],
@@ -219,6 +212,7 @@ extern "C" fn native_copy_from_bytes(
 ) -> Unit = "blas_copy_from_bytes"
 
 ///|
+#borrow(dst)
 extern "C" fn native_copy_to_bytes(
   dst : FixedArray[Byte],
   src : Int64,
@@ -247,6 +241,17 @@ extern "C" fn native_sgemm_direct(
   c : Int64,
   ldc : Int,
 ) -> Unit = "blas_sgemm_direct"
+
+///|
+extern "C" fn native_sgemm_direct_batch(
+  m : Int,
+  n : Int,
+  k : Int,
+  a : Int64,
+  b : Int64,
+  c : Int64,
+  iterations : Int,
+) -> Unit = "blas_sgemm_direct_batch"
 
 ///|
 extern "C" fn native_layer1_fused(
@@ -330,6 +335,23 @@ pub fn sgemm_direct(
 }
 
 ///|
+/// Repeats C = A @ B in one native call while reusing all C-side buffers.
+pub fn sgemm_direct_batch(
+  a : FloatBuffer,
+  b : FloatBuffer,
+  c : FloatBuffer,
+  m : Int,
+  n : Int,
+  k : Int,
+  iterations~ : Int,
+) -> Unit {
+  if iterations <= 0 {
+    abort("sgemm_direct_batch iterations must be positive")
+  }
+  native_sgemm_direct_batch(m, n, k, a.0, b.0, c.0, iterations)
+}
+
+///|
 /// Fused layer1: output = ReLU(input @ weight + bias)
 /// input: batch x in_dim, weight: in_dim x out_dim, bias: out_dim, output: batch x out_dim
 pub fn layer1_fused(
@@ -341,7 +363,15 @@ pub fn layer1_fused(
   in_dim : Int,
   out_dim : Int,
 ) -> Unit {
-  native_layer1_fused(input.0, weight.0, bias.0, output.0, batch, in_dim, out_dim)
+  native_layer1_fused(
+    input.0,
+    weight.0,
+    bias.0,
+    output.0,
+    batch,
+    in_dim,
+    out_dim,
+  )
 }
 
 ///|
@@ -356,7 +386,15 @@ pub fn layer2_fused(
   in_dim : Int,
   out_dim : Int,
 ) -> Unit {
-  native_layer2_fused(input.0, weight.0, bias.0, output.0, batch, in_dim, out_dim)
+  native_layer2_fused(
+    input.0,
+    weight.0,
+    bias.0,
+    output.0,
+    batch,
+    in_dim,
+    out_dim,
+  )
 }
 
 // ============================================================================
@@ -525,6 +563,12 @@ pub fn free_ints(buf : IntBuffer) -> Unit {
 /// Set int at index in C buffer
 pub fn set_int(buf : IntBuffer, idx : Int, val : Int) -> Unit {
   native_set_int(buf.0, idx, val)
+}
+
+///|
+/// Get int at index from C buffer
+pub fn get_int(buf : IntBuffer, idx : Int) -> Int {
+  native_get_int(buf.0, idx)
 }
 
 ///|
